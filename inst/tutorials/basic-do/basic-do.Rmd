@@ -1,0 +1,216 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(learnr)
+library(ggplot2)
+library(palmerpenguins)
+
+```
+
+
+## Introduction
+
+In the last module, we explored basic R language components by plotting data from the `palmerpenguins` package. We are going to continue exploring the `penguins` data and plotting with `ggplot2` functions with a specific focus on data object types.
+
+
+## Viewing data
+
+When we create plots using `ggplot2`, we have to specify the name of data object and the variables. Object names in R are case sensitive, which means that the pattern of lower and uppercase letters must match exactly.  
+
+```{r, echo=TRUE}
+ggplot(data = penguins) +
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
+                 shape = species))
+```
+
+
+What if we do not remember the names of all of the variables? Should we just guess? Of course not. 
+
+### Summary view
+
+Simply by running the data object name as code, we can print out a summary of the data.
+
+```{r basic-summary, exercise = TRUE}
+penguins
+```
+
+This view is helpful, but it may be insufficient for data sets with large numbers of columns. 
+
+### List of variable names
+
+If we only need a list of variable names, then we can use `names()` or `colnames()`.
+
+```{r view-names, exercise=TRUE}
+names(penguins)
+
+```
+
+
+### Detailed summary
+
+Perhaps we want a more detailed summary of our data. We can use `str()` (short for _structure_) to see the name and type of all variables in our data set. Being able to view the variable name **and type** is especially useful for data visualization because our choice of plot will depend on the kind of data we want to see.
+
+### Check your understanding
+
+```{r blank-exercise, exercise = TRUE}
+
+```
+
+```{r quiz}
+quiz(
+  question("Using one of the methods described above, select all of the variable names below that represent Factor type variables in the penguins dataset.",
+    answer("species", correct = TRUE),
+    answer("island" , correct = TRUE),
+    answer("body_mass_g"),
+    answer("year")
+  )
+)
+```
+
+
+## Determining data object type
+
+In the beginning, we will focus on **data.frames**. Data.frames are the most commonly used type of data object in R. They are two-dimensional objects, meaning that to identify a specific value in the data set, you need to know two pieces of information: its row and its column position. Data.frames are popular because they provide a logical way to group related variables together.
+
+Let's look at an example other than `penguins`. 
+
+Run the following code chunk.
+```{r examine-mtcars, exercise=TRUE}
+mtcars
+```
+
+When we run the code `mtcars`, R outputs a grid of values. In this case, each row represents one type of car, and each column contains data about different aspects of the cars. 
+
+We can confirm that `mtcars` is a data.frame using the `class` function.
+
+```{r class-mtcars, exercise=TRUE}
+class(mtcars)
+```
+
+It is important to verify data object type because data types impact the ways we can access information stored in the data object. We will spend lots of time learning about how to access and extract information from data objects. For now, just know that the object type will determine the kinds of functions and extract methods we can use.
+
+
+### Data column types
+Each of the columns in a data.frame represents a single type of data. The simplest data types are numeric/integer, character, and logical. You can determine a data column's type using the same `class()` function we used to verify object type for a data.frame. 
+
+To let R know that you want the class of a column and not the whole data object, we use a dollar sign (`$`) to connect the data object's name with the column's name.
+
+Check it out:
+```{r column-class, exercise=TRUE}
+class(penguins$species)
+
+class(penguins$sex)
+
+class(penguins$body_mass_g)
+```
+
+
+### Check your understanding
+
+Use what you have learned to view the `mtcars` dataset and answer the following questions.
+
+```{r blank-exercise-mtcars, exercise = TRUE, exercise.lines = 5}
+
+
+```
+
+```{r blank-exercise-mtcars-hint}
+# The most helpful functions are the ones that show
+# both variable name and type.
+
+```
+
+
+
+```{r quiz2}
+quiz(
+  question("How many variables are in mtcars?",
+    answer("5"),
+    answer("8"),
+    answer("11", correct = TRUE),
+    answer("32")
+  ),
+  question("Which of the following are variable names in mtcars?",
+    answer("engine"),
+    answer("mpg", correct = TRUE),
+    answer("axle"),
+    answer("gear", correct = TRUE)
+  )
+)
+```
+
+
+
+
+## Creating data objects
+
+One of the coolest aspects of programming is the ability to create and innovate. You are not restricted to templates or pre-selected options. 
+
+In R, we create new objects using the assignment operator (`<-`). When reading code, the assignment operator is read as "gets the value of". For example, `x <- 2` is read as "x gets the value of two".
+
+We can store all kinds of things in R objects, including entire plots. One reason we might store a plot is that we want to make lots of plots that share some code. Rather than write out the same lines repeatedly, we save the portion of code that is shared and add on the unique parts. 
+
+You have seen this strategy before in the `ggplot2` cheatsheet. The section dedicated to plotting two continuous variables begins with the following code:
+
+```
+e <- ggplot(mpg, aes(cty, hwy))
+```
+
+If we try to examine the output of this code, we will probably be disappointed because it will look like nothing happened. The reason for this is that R does not print out anything to the screen when new objects are created.
+
+
+```{r, echo=TRUE}
+e <- ggplot(mpg, aes(cty, hwy))
+```
+
+
+We have to run the object name (`e`) to see what is stored.
+
+
+```{r, echo=TRUE}
+e
+```
+
+This plot shows our `x` and `y` aesthetics (`cty` and `hwy`, respectively), and the numbers on the axes seem reasonable for those variables, but there are no points, bars, lines, boxplots, or anything.
+
+And there will not be anything in the plot area until we specify a `geom`. 
+
+```{r, echo=TRUE}
+e + geom_point()
+```
+
+
+## More on data object creation
+
+You will know you have successfully created a new object when you see it appear in the Environment tab in RStudio or see it listed when you run the function `ls()`. **Importantly,** there are times when you will run code and not see objects appear. Right now, you are in a `learnr` module, so you will not see any changes to the Environment tab. You also will not see changes when you knit R Markdown scripts.
+
+Try running the following code. 
+```{r assignment, exercise=TRUE}
+my_data <- c(4, 5, 6, 7)
+```
+
+Did anything happen? It might have looked like nothing happened because when we create new objects in R, R does not print anything to the screen. In order to see your new object, you need to go back to the code block and type `my_data` in line 3 and then click `Run Code`. 
+
+Now, you should see a print out reading `[1] 4 5 6 7`. The `[1]` indicates the first line in the output (you will see more numbers for longer outputs) and the `4 5 6 7` is the data stored in the object `my_data`. 
+
+How can we confirm that `my_data` is a data.frame? Run the code to verify your answer.
+
+```{r confirm-df, exercise = TRUE}
+my_data
+```
+
+```{r confirm-df-hint}
+# There is a function we can use that will tell us 
+# the specific kind of object something is in R. 
+# Do you remember its name?
+```
+
+```{r confirm-df-solution}
+class(my_data)
+```
