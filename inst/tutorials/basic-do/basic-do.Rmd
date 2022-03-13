@@ -32,7 +32,7 @@ ggplot(data = penguins) +
 
 What if we do not remember the names of all of the variables? Should we just guess? Of course not. 
 
-### Summary view
+## Summary view
 
 Simply by running the data object name as code, we can print out a summary of the data.
 
@@ -41,6 +41,34 @@ penguins
 ```
 
 This view is helpful, but it may be insufficient for data sets with large numbers of columns. 
+
+
+
+```{r quiz-summary-view}
+quiz(
+  caption = "Take a Closer Look",
+  question("How many variables are in penguins?",
+    answer("8", correct = TRUE),
+    answer("10"),
+    answer("35"),
+    answer("344"),
+    incorrect = "Variables are typically stored as columns in data.frames. Verify that you are counting columns (not rows) and try again.",
+    allow_retry = TRUE
+  ),
+  question("How many observations are in penguins?",
+    answer("8"),
+    answer("10"),
+    answer("35"),
+    answer("344", correct = TRUE)
+  )
+  
+  # question("Describe the kind of information we can see by simply running a data object's name?", 
+  #          type = "learnr_text")
+)
+```
+
+
+
 
 ### List of variable names
 
@@ -52,19 +80,16 @@ names(penguins)
 ```
 
 
-### Detailed summary
 
-Perhaps we want a more detailed summary of our data. We can use `str()` (short for _structure_) to see the name and type of all variables in our data set. Being able to view the variable name **and type** is especially useful for data visualization because our choice of plot will depend on the kind of data we want to see.
+## Detailed summary
+
+Perhaps we want a more detailed summary of our data. We can use `str()` (short for _structure_) to see the name and type of all variables in our data set. Being able to view the **variable name and type** is especially useful for data visualization because our plot choice will depend on the data type(s) we want to see. 
 
 ### Check your understanding
 
-```{r blank-exercise, exercise = TRUE}
-
-```
-
 ```{r quiz}
 quiz(
-  question("Using one of the methods described above, select all of the variable names below that represent Factor type variables in the penguins dataset.",
+  question("Select all of the variable names below that represent `factor` type variables in the penguins dataset. You can use the code area below to apply the functions described in this module.",
     answer("species", correct = TRUE),
     answer("island" , correct = TRUE),
     answer("body_mass_g"),
@@ -72,6 +97,11 @@ quiz(
   )
 )
 ```
+
+```{r blank-exercise, exercise = TRUE}
+
+```
+
 
 
 ## Determining data object type
@@ -96,7 +126,8 @@ class(mtcars)
 It is important to verify data object type because data types impact the ways we can access information stored in the data object. We will spend lots of time learning about how to access and extract information from data objects. For now, just know that the object type will determine the kinds of functions and extract methods we can use.
 
 
-### Data column types
+## Data column types
+
 Each of the columns in a data.frame represents a single type of data. The simplest data types are numeric/integer, character, and logical. You can determine a data column's type using the same `class()` function we used to verify object type for a data.frame. 
 
 To let R know that you want the class of a column and not the whole data object, we use a dollar sign (`$`) to connect the data object's name with the column's name.
