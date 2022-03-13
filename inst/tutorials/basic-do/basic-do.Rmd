@@ -47,23 +47,12 @@ This view is helpful, but it may be insufficient for data sets with large number
 ```{r quiz-summary-view}
 quiz(
   caption = "Take a Closer Look",
-  question("How many variables are in penguins?",
-    answer("8", correct = TRUE),
-    answer("10"),
-    answer("35"),
-    answer("344"),
-    incorrect = "Variables are typically stored as columns in data.frames. Verify that you are counting columns (not rows) and try again.",
-    allow_retry = TRUE
-  ),
-  question("How many observations are in penguins?",
-    answer("8"),
-    answer("10"),
-    answer("35"),
-    answer("344", correct = TRUE)
-  )
   
-  # question("Describe the kind of information we can see by simply running a data object's name?", 
-  #          type = "learnr_text")
+  question("Describe the kind of information we can see by simply running a data object's name. (NB: The tutorial will show you the correct answer, but you have to compare your answer to the key.)",
+           type = "learnr_text", 
+           answer("You can see the dataset dimensions (i.e., number of rows and columns), data values, variable names, variable types. Because you see data values, you might see potential data issues like missing values (denoted as NA).", correct = TRUE),
+           incorrect = "Review your answer. Did you mention everything important? Did you notice a detail not included in the answer key?", 
+           message = "You can see 1) the dataset dimensions (i.e., number of rows and columns), 2) data values, 3) variable names, 4) variable types. Because you see data values, you might see 5) data issues like missing values (denoted as NA).")
 )
 ```
 
@@ -142,9 +131,9 @@ class(penguins$body_mass_g)
 ```
 
 
-### Check your understanding
+## Check your understanding
 
-Use what you have learned to view the `mtcars` dataset and answer the following questions.
+Use what you have learned to view the `mtcars` and `penguins` datasets and answer the following questions.
 
 ```{r blank-exercise-mtcars, exercise = TRUE, exercise.lines = 5}
 
@@ -161,17 +150,32 @@ Use what you have learned to view the `mtcars` dataset and answer the following 
 
 ```{r quiz2}
 quiz(
-  question("How many variables are in mtcars?",
+  question("How many variables are in `mtcars`?",
     answer("5"),
     answer("8"),
     answer("11", correct = TRUE),
     answer("32")
   ),
-  question("Which of the following are variable names in mtcars?",
+  question("Which of the following are variable names in `mtcars`?",
     answer("engine"),
     answer("mpg", correct = TRUE),
     answer("axle"),
     answer("gear", correct = TRUE)
+  ), 
+  
+  question("How many variables are in `penguins`?",
+    answer("8", correct = TRUE),
+    answer("10"),
+    answer("35"),
+    answer("344"),
+    incorrect = "Variables are typically stored as columns in data.frames. Verify that you are counting columns (not rows) and try again.",
+    allow_retry = TRUE
+  ),
+  question("Which function(s) will show variable names, variable types, data object dimensions, and actual data values for the first few observations? Select all of the functions that fit these criteria. (You can use the ? operator to pull up help pages.)",
+    answer("str()", correct = TRUE),
+    answer("dim()"),
+    answer("head()"),
+    answer("tail()")
   )
 )
 ```
