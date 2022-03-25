@@ -168,7 +168,8 @@ If you try to visualize a variable that is not in `penguins` or you misspell a v
 
 Below, `bill_length_mm` has been written incorrectly. Variable names are case sensitive, which means that the pattern of lower and uppercase letters must match exactly to be considered spelled correctly.
 
-What happens if a misspelled variable is mapped onto the x axis?
+What happens if a misspelled variable is mapped onto the x axis? Try capitalizing the variable name `bill_length_mm` so that the code reads `x = Bill_length_mm`.   
+
 ```{r mistake-plot, exercise=TRUE}
 
 ggplot(data = penguins) +
@@ -179,7 +180,7 @@ ggplot(data = penguins) +
 ```{r ggplot-error-quiz}
 quiz(
   question("The next line of code starts with `geom_point(...`. What do you think `geom_point` is?",
-    answer("object 'Bill_Length_mm' not found", correct = TRUE),
+    answer("object 'Bill_length_mm' not found", correct = TRUE),
     answer("Warning: R could not plot."),
     answer("No plot or message appears.")
   )
@@ -194,7 +195,8 @@ We have seen how to create one specific figure, but what if we want to change th
 ```{r penguin-plot2, echo=TRUE, message=FALSE}
 
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
                  color = species))
 ```
 
@@ -233,7 +235,8 @@ Modify the code below so that species is mapped on to `shape` rather than `color
 ```{r penguin-plot3, exercise = TRUE}
 
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
                  color = species))
 ```
 
@@ -241,26 +244,30 @@ ggplot(data = penguins) +
 ```{r penguin-plot3-solution}
 
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
                  shape = species))
 ```
 
 
 ### Exercise 2 
 
-Modify this plot so that both point size and point color are mapped to `species`.
+Modify this plot so that both point shape and point color are mapped to `species`.
 ```{r penguin-plot4, exercise = TRUE}
 
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
                  color = species))
 ```
 
 ```{r penguin-plot4-solution}
 
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = bill_depth_mm,
-                 color = species, shape = species))
+  geom_point(aes(x = bill_length_mm, 
+                 y = bill_depth_mm,
+                 color = species, 
+                 shape = species))
 ```
 
 
@@ -301,12 +308,14 @@ Create a scatter plot comparing bill length (`bill_length_mm`) and flipper lengt
 
 ```{r add-exercise-1, exercise=TRUE}
 ggplot(data = penguins) +
-  geom_point(aes(x = ... , y = ...))
+  geom_point(aes(x = ... , 
+                 y = ...))
 ```
 
 ```{r add-exercise-1-solution}
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm, y = flipper_length))
+  geom_point(aes(x = bill_length_mm, 
+                 y = flipper_length))
 ```
 
 
@@ -317,12 +326,14 @@ Modify this scatter plot so that the point shape corresponds to penguin sex (`se
 
 ```{r add-exercise-2, exercise=TRUE}
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm , y = body_mass_g))
+  geom_point(aes(x = bill_length_mm, 
+                 y = body_mass_g))
 ```
 
 ```{r add-exercise-2-solution}
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm , y = body_mass_g,
+  geom_point(aes(x = bill_length_mm, 
+                 y = body_mass_g,
                  shape = sex))
 ```
 
@@ -351,7 +362,9 @@ In this figure, someone has attempted to set all of the points to be the color *
 
 ```{r add-exercise-4, exercise=TRUE}
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm , y = body_mass_g))
+  geom_point(aes(x = bill_length_mm, 
+                 y = body_mass_g, 
+                 color = "blue"))
 ```
 
 ```{r add-exercise-4-hint}
@@ -360,8 +373,8 @@ ggplot(data = penguins) +
 
 ```{r add-exercise-4-solution}
 ggplot(data = penguins) +
-  geom_point(aes(x = bill_length_mm , y = body_mass_g, 
-                 color = "blue"))
+  geom_point(aes(x = bill_length_mm , y = body_mass_g), 
+                 color = "blue")
 ```
 
 
@@ -384,7 +397,7 @@ ggplot(data = penguins) +
 ggplot(data = penguins) +
   geom_density(aes(bill_length_mm, 
                    fill = species),
-                   alpha = 0.2) # any value between ~0.30 and ~.70 is interpretable
+                   alpha = 0.4) # any value between ~0.30 and ~.70 is interpretable because the figure has enough shading to be distinctive but is transparent enough to show overlaps in the distributions.
 ```
 
 
@@ -425,7 +438,7 @@ ggplot(data = penguins) +
 # What questions do you have from this tutorial?
 # 
 # 
-# Is there anything specific you would like to review or practice in class? Note: "All of it." is not an appropriate answer because it is not specific.
+# Is there anything specific you would like to review or practice in class? Note: "All of it." is not a good answer because it is not specific.
 
 
 ```
