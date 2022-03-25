@@ -15,7 +15,7 @@ library(palmerpenguins)
 
 ## Introduction
 
-In the last module, we explored basic R language components by plotting data from the `palmerpenguins` package. We are going to continue exploring the `penguins` data and plotting with `ggplot2` functions with a specific focus on data object types.
+This module explores how R data object types impact our ability to use functions and accomplish tasks like creating data visualizations. The `penguins` dataset from the `{palmerpenguins}` package will be used to illustrate our examples. 
 
 
 ## Viewing data
@@ -30,7 +30,27 @@ ggplot(data = penguins) +
 ```
 
 
-What if we do not remember the names of all of the variables? Should we just guess? Of course not. 
+
+
+```{r quiz-rhetorical-q}
+quiz(
+  caption = "Consider",
+  
+  question(
+    "What if we do not remember the names of all of the variables in `penguins`? Select all options we could use to learn more about the variables in `penguins`",
+    answer("All hope is lost."),
+    answer("We can run the name of a data object to see a printout.", correct = TRUE),
+    answer("We can use functions to print variable names.", correct = TRUE),
+    answer(
+      "We can type `the data object's name`penguins$` in the console and hit tab to show a list of variable names.",
+      correct = TRUE
+    ),
+           incorrect = "It is okay if you missed some of the methods we can use to view variables. We will review them in this module."
+  )
+)
+```
+
+
 
 ## Summary view
 
@@ -95,7 +115,7 @@ quiz(
 
 ## Determining data object type
 
-In the beginning, we will focus on **data.frames**. Data.frames are the most commonly used type of data object in R. They are two-dimensional objects, meaning that to identify a specific value in the data set, you need to know two pieces of information: its row and its column position. Data.frames are popular because they provide a logical way to group related variables together.
+R contains many data object types, including lists, arrays, matrices, vectors, and **data.frames**. Data.frames are the most commonly used type of data object in R. They are two-dimensional objects, meaning that to identify a specific value in the data set, you need to know two pieces of information: its row and its column position. Data.frames are popular because they provide a logical way to group related variables together.
 
 Let's look at an example other than `penguins`. 
 
@@ -104,7 +124,8 @@ Run the following code chunk.
 mtcars
 ```
 
-When we run the code `mtcars`, R outputs a grid of values. In this case, each row represents one type of car, and each column contains data about different aspects of the cars. 
+When we run the code `mtcars`, R outputs a rectangular grid of values. In this case, each row represents one type of car, and each column contains data about different aspects of the cars.  
+
 
 We can confirm that `mtcars` is a data.frame using the `class` function.
 
@@ -129,6 +150,40 @@ class(penguins$sex)
 
 class(penguins$body_mass_g)
 ```
+
+
+## An important data.frame feature
+
+Print out the `mtcars` object. Scroll through the pages and look at all of the values. 
+
+```{r examine-mtcars2, exercise=TRUE}
+mtcars
+```
+
+
+```{r quiz-rect-data}
+quiz(question(
+  "What do you notice about the number of values in each column?",
+  answer("All columns have the same number of values (i.e., rows)", correct = TRUE),
+  answer("All columns have a different number of values (i.e., rows)"), 
+  incorrect = "Are you sure? Look more closely.",
+  message = "Exactly! All columns have the same number of values."
+))
+```
+
+### Verifying column size
+
+Every column within a data.frame has values in the same number of rows as every other column. You can prove that all of the variables (i.e., columns) in `mtcars` have the same number of observations (i.e., rows) using the `length()` function.
+
+```{r examine-mtcars-col-length, exercise=TRUE}
+
+# For example:
+length(mtcars$mpg)
+length(mtcars$cyl)
+length(mtcars$disp) 
+```
+
+We can verify that `mpg`, `cyl`, and `disp` all have 32 values. Even if we had missing data, we would still include a symbol (NA) in the dataset to indicate that the measurement of that variable for that observation is not available.
 
 
 ## Check your understanding
@@ -182,70 +237,3 @@ quiz(
 
 
 
-
-## Creating data objects
-
-One of the coolest aspects of programming is the ability to create and innovate. You are not restricted to templates or pre-selected options. 
-
-In R, we create new objects using the assignment operator (`<-`). When reading code, the assignment operator is read as "gets the value of". For example, `x <- 2` is read as "x gets the value of two".
-
-We can store all kinds of things in R objects, including entire plots. One reason we might store a plot is that we want to make lots of plots that share some code. Rather than write out the same lines repeatedly, we save the portion of code that is shared and add on the unique parts. 
-
-You have seen this strategy before in the `ggplot2` cheatsheet. The section dedicated to plotting two continuous variables begins with the following code:
-
-```
-e <- ggplot(mpg, aes(cty, hwy))
-```
-
-If we try to examine the output of this code, we will probably be disappointed because it will look like nothing happened. The reason for this is that R does not print out anything to the screen when new objects are created.
-
-
-```{r, echo=TRUE}
-e <- ggplot(mpg, aes(cty, hwy))
-```
-
-
-We have to run the object name (`e`) to see what is stored.
-
-
-```{r, echo=TRUE}
-e
-```
-
-This plot shows our `x` and `y` aesthetics (`cty` and `hwy`, respectively), and the numbers on the axes seem reasonable for those variables, but there are no points, bars, lines, boxplots, or anything.
-
-And there will not be anything in the plot area until we specify a `geom`. 
-
-```{r, echo=TRUE}
-e + geom_point()
-```
-
-
-## More on data object creation
-
-You will know you have successfully created a new object when you see it appear in the Environment tab in RStudio or see it listed when you run the function `ls()`. **Importantly,** there are times when you will run code and not see objects appear. Right now, you are in a `learnr` module, so you will not see any changes to the Environment tab. You also will not see changes when you knit R Markdown scripts.
-
-Try running the following code. 
-```{r assignment, exercise=TRUE}
-my_data <- c(4, 5, 6, 7)
-```
-
-Did anything happen? It might have looked like nothing happened because when we create new objects in R, R does not print anything to the screen. In order to see your new object, you need to go back to the code block and type `my_data` in line 3 and then click `Run Code`. 
-
-Now, you should see a print out reading `[1] 4 5 6 7`. The `[1]` indicates the first line in the output (you will see more numbers for longer outputs) and the `4 5 6 7` is the data stored in the object `my_data`. 
-
-How can we confirm that `my_data` is a data.frame? Run the code to verify your answer.
-
-```{r confirm-df, exercise = TRUE}
-my_data
-```
-
-```{r confirm-df-hint}
-# There is a function we can use that will tell us 
-# the specific kind of object something is in R. 
-# Do you remember its name?
-```
-
-```{r confirm-df-solution}
-class(my_data)
-```
