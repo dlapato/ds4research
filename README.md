@@ -15,7 +15,7 @@ devtools::install_github("dlapato/ds4research")
 ```
 
 
-To begin a tutorial, run `learnr::run_tutorial("tutorial-name", package = "ds4e").
+To begin a tutorial, run `learnr::run_tutorial("tutorial-name", package = "ds4e")`.
 
 Example:
 

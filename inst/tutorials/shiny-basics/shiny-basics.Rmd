@@ -1,0 +1,519 @@
+---
+title: "R Shiny Basics - Reactivity"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(palmerpenguins)
+library(knitr)
+
+#library(here)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## **Why Reactivity?**
+
+This module will introduce you to key functions for creating interactive features in interactive R products. The concepts and functions detailed in this module can be applied to both flexdashboards with `shiny` elements and Shiny Apps. Most of the subsections in this module will use language and examples geared towards developing a dashboard, but the concepts and programming skills apply to other projects, too, including articles, books, posters, and even individual figures. 
+
+###   
+ 
+
+### **Why you have to know it**
+
+This course requires you to learn how to create interactive research products for two reasons. **First is career-related.** Programming skills are in demand, and the ability to create the skillset is beneficial for career advancement regardless of sector (e.g., industry, academia, self-employment). These skills allow one to transform a wall of numbers in a spreadsheet into an interactive experience that empowers readers to explore, expand, and create. 
+
+**The second reason centers on reproducibility, transparency, and accessibility.** Interactive research products can give other users the ability to audit your results, even if they do not know how to code. Removing this barrier is critical because most folks do not have programming expertise.
+
+In short, interactive data products can make your research more engaging. 
+
+![Haadia Khan Art for Disabled And Here](images/DAH_Haadia_Khan_art_museum.jpeg "A Pakistani Deaf woman wearing a hijab sits on a bench at an art museum, immersed in a world of florals and soft hues. She places her powered-off hearing aids on top of a sketchbook to her right, closing out the surrounding noise. A tablet and stylus pen have been set down on the left side of the bench."){ width=50% }
+ 
+
+### **What you have to know**
+
+As part of the course, you must demonstrate an ability to:   
+
+   1. Add reactive elements to a flexdashboard   
+   2. Give interactive elements functional capability   
+   3. Match appropriate and logical functionality to interactive elements   
+   4. Understand all necessary code components for creating reactive elements
+
+
+
+
+## **Reactive Data Input Functions**  
+
+You can empower users to subset data by categories or variables of interest to them. **First, you must choose an input method.** Your choice should reflect the kinds of options available to your users. 
+
+### Choosing the right tool    
+
+Consider five simple ways to solicit user input: a group checkbox (1), radio buttons (2), a slider bar (3), a date range selector (4), and a free text box (5). **Try out each input method.** Don't worry; you cannot break or hurt anything. These input options will respond if you click on them (e.g., check or uncheck a box), but they are not able to modify any data or disrupt the tutorial environment.
+
+```{r}
+
+checkboxGroupInput(
+  inputId = "quiz1_checkbox",
+  label = h4("1. Checkboxes (group)"),
+  choices = unique(mtcars$cyl)
+)
+
+radioButtons("radio", 
+             h4("2. Radio buttons"),
+                        choices = unique(mtcars$cyl))
+
+
+sliderInput(
+  inputId = "quiz1_slider",
+  label   = h4("3. Slider bar"),
+  min     = 0,
+  max     = 1,
+  value   = c(0.50, 0.75),
+  step    = 0.05,
+  ticks   = FALSE, 
+  width = '50%')
+
+dateRangeInput("dates", h4("4. Date range"))
+
+textInput("text", h4("5. Free text box"), 
+                     value = "Enter text...")
+```
+
+### Consider the following
+
+```{r intro_quiz}
+quiz(
+  question("If you saw an option for a group checkbox (first option shown), how many of the answer options would you expect you could select?",
+    answer("One and only one"),
+    answer("One or multiple", 
+           correct = TRUE)
+  ),
+  question("Which input option would be best for allowing users to select values for a continuous variable?",
+    answer("Radio button"),
+    answer("Slider bar", correct = TRUE),
+    answer("Checkboxes (group)"),
+    answer("Free text box")
+  )
+)
+```
+
+The process of selecting data for data visualizations is the same for tables and plots made with `ggplot2`. Let's start with tables.
+
+### Selecting and filtering data
+
+You can use the `dplyr` data wrangling functions as part of the reactive data creation process. In the next few chapters, we will discuss how to use operators like `%in%` and functions like `any_of()` to create flexible code that will execute no matter how many variables or category options your users select.
+
+## Creating Reactive Tables
+
+Now, let's say that you want to allow users to show only a subset of the data in a table. If you use `DT::datatable()`, your users will be able to search and sort the data, but they cannot truly subset it. They will have whatever dataset you passed to the `datatable()` function.
+
+###   
+
+Let's say that you want to allow your users to select penguins from the `penguins` dataset from the `palmerpenguins` package.
+
+This code is the typical code we might use for `flexdashboard`. 
+
+```
+DT::datatable(penguins)
+```
+
+In the above code snippet, the entire `penguins` dataset is passed to `datatable()`. If we wanted, we could create a new variable with a subset of the penguins dataset and have that variable read in instead of `penguins`. However, we the dashboard creators would have to make that variable, which means that that variable would **not** be reactive.
+
+###    
+
+There are many ways to create a reactive table. Here is one way a reactive table could be coded:
+
+```
+# select a method for user input
+checkboxGroupInput(
+  inputId = "speciesSelector", # pick a descriptive name!!!!
+  label = h4("Choose one or more species"),
+  choices = unique(penguins$species), 
+  selected = "Adelie" # optional
+)
+
+# create a reactive object
+penguins_sorted <- reactive({
+   req(input$speciesSelector)
+   
+   filter(penguins, species %in% input$speciesSelector) })
+  
+  
+# use a shiny-specific render function
+# note how we write the name of a reactive data object
+DT::renderDataTable(penguins_sorted(), 
+                    options = list(
+  pageLength = 50,   # optional
+  scrollY = '700px') # optional
+  )   
+```
+
+###   
+
+Important features of reactive code:    
+
+1. **Use `reactive({ ... })` when creating a reactive data object.**   Surround the code used to filter and subset the data with this function. You can use all your favorite dplyr functions. 
+
+###  
+
+
+2. **Link the input method and the data by using the `inputID` as if it were a variable.**    Instead of `filter(penguins, species == "Adelie")` or `filter(penguins, species %in% c("Adelie", Chinstrap))`, we will use `filter(penguins, species %in% **input$speciesSelector**)`. This syntax shows that we, the app creators, do not know what values will be used to select penguin species, but we will store the users' choices and use them in creating our table.
+
+###  
+
+
+3. **We can require users to provide a value with the apply named `req()` function.**    Sometimes we need to require users to provide input if the lack of a value would interfere with our dashboard's function. For these situations, include a `req()` statement inside your `reactive({})` statement. Also consider providing help text and using a default value for selection to cue your users into the correct way to use your dashboard.
+
+###  
+
+
+4. **Reactive data objects always have `()` at the end of their name when used in coding.**    When we refer to reactive data objects, we _must_ remember to include the parentheses (`penguins_sorted()` not `penguins_sorted`).
+
+###  
+
+
+5. **Use the appropriate `render*` function to ensure best outcomes.**    In this case, we use `renderDataTable()` not `datatable()`. These functions perform similar tasks, but the first one is specifically for use in Shiny environments, documents, and applications.
+
+
+### Pause
+
+```{r render_table_quiz}
+quiz(
+  question("What do you notice about how reactive data object names look? (Hint: With what other R object could reactive data objects be confused?",
+    answer("Reactive data objects look like functions", 
+           correct = TRUE), 
+    type = "learnr_text",
+    incorrect = "Check your answer against the key",
+    message = "Reactive data objects look like functions"
+)
+)
+```
+
+
+## Filtering by Multiple Columns
+
+What if I want my users to be able to filter the data based on values in multiple variables? 
+
+### Let's explore
+
+For non-reactive tables, we might do something like this:
+
+```
+penguins %>% 
+    filter(species %in% c("Adelie", "Gentoo")) %>% 
+    filter(island %in% c("Dream")) %>% 
+    filter(between(body_mass_g, 5000, 6000)) %>% 
+    DT::datatable()
+```
+
+###    
+
+The reactive version of the code needs a few modifications. Let's look at an example where users can subset the data based on penguin species, island residence, and total body mass.
+
+```
+# create an input object for each variable
+checkboxGroupInput(
+  inputId = "speciesSelector", # pick a descriptive name!!!!
+  label = h4("Choose one or more species"),
+  choices = unique(penguins$species), 
+  selected = "Adelie" # optional
+)
+
+checkboxGroupInput(
+  inputId = "islandSelector", # pick a descriptive name!!!!
+  label = h4("Choose one or more islands"),
+  choices = unique(penguins$species)
+)
+
+sliderInput(
+  inputId = "body_mass_selector",
+  label   = h4("Select Penguin Size"),
+  min     = min(penguins$body_mass_g),
+  max     = max(penguins$body_mass_g),
+  value   = c(3000, 5000),
+  step    = 100,
+  ticks   = FALSE, 
+  width = '50%')
+
+# create a reactive data object
+penguins_multiple_filter <- reactive({ penguins %>% 
+    filter(species %in% input$speciesSelector) %>% 
+    filter(island %in% input$islandSelector) %>% 
+    filter(between(body_mass_g, 
+                   input$body_mass_selector[1],
+                   input$body_mass_selector[2]))
+})
+
+# create a Shiny Data Table object
+DT::renderDataTable(penguins_multiple_filter(), 
+                    options = list(
+                      pageLength = 50, 
+                      scrollY = '600px',
+                      scrollX = '600px'))
+```
+ 
+  
+### 
+
+The reactive code looks remarkably similar to the non-reactive code. 
+
+```{r multiple_filter_quiz}
+quiz(
+  question("What are some differences in the code that you notice?",
+    answer("Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering.", 
+           correct = TRUE), 
+    type = "learnr_text",
+    incorrect = "Check your answer against the key",
+    message = "Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering."
+)
+)
+```
+
+
+
+## Selecting Columns
+
+What if I want my users to have the option to expand or shrink the table? How can I code column selection so that 1) no column names are misspelled and 2) users can select one or several column names? How do I account for situations where no columns are selected?
+
+### Let's explore
+
+For non-reactive tables, we might do something like this:
+
+```
+penguins %>% 
+    select(species, island, body_mass_g) %>% 
+    DT::datatable()
+```
+
+###    
+
+The reactive version of the code needs a few modifications. Let's look at an example where users can choose to display any of the variables in `penguins`.
+
+
+```
+# create input object allowing users to choose variables
+checkboxGroupInput(
+  inputId = "variableSelector",     # pick a descriptive name (!)
+  label = h4("Choose one or more variables for the table"),
+  choices = names(penguins)
+)
+
+
+# create reactive data object
+penguin_select <- reactive({ penguins %>% 
+    dplyr::select(any_of(input$variableSelector)) # note the use of any_of (!)
+})
+
+
+# create a Shiny Data Table object
+DT::renderDataTable(penguin_select(), 
+                    options = list(
+                      pageLength = 50, 
+                      scrollY = '600px', # optional choices
+                      scrollX = '600px'))
+
+```
+
+### 
+
+
+```{r select_table_quiz}
+quiz(
+  question("What do you think of the table we made? Could there be any interpretability issues?",
+    answer("The table header names are variable names.", correct = TRUE),
+    answer("The variable values are not easily understood."),
+    answer("This is a trick question. The table looks fine and would be easily understandable.")
+)
+)
+```
+
+
+### Let's refine the table options
+
+Variable names generally do not make good labels. They are typically are not capitalized, which may appear professional. Also, variable names that are not complete words may be unintellible to a general audience. 
+
+Consider the variable names in the `mtcars` dataset.
+
+```{r}
+names(mtcars)
+```
+
+
+How many people would know that `drat` refers to "rear axle ratio"? Probably not many.
+
+###    
+
+If we want our app users to see labels different from our variable names, we can specify the new labels in the `choices` argument of the function that creates the input method. 
+
+```
+# create input object allowing users to choose variables
+# use the choices argument to create refined labels for users
+checkboxGroupInput(
+  inputId = "variableSelector",       # pick a descriptive name (!)
+  label = h4("Choose one or more variables for the table"),
+  choices = c("Species" = "species",
+              "Island" = "island",
+              "Body mass (g)" = "body_mass_g",
+              "Bill length (mm)" = "bill_length_mm",
+              "Bill depth (mm)" = "bill_depth_mm",
+              "Flipper length (mm)" = "flipper_length_mm",
+              "Sex" = "sex",
+              "Year" = "year"
+  )
+)
+
+```
+  
+
+
+
+## **Creating Reactive Plots**
+
+We have made a table with our reactive data object (`penguins_sorted()`), but what if we want a reactive figure? Based on what you have learned about creating reactive tables, which of the following things do we need to create a reactive figure?
+
+```{r render_figure_intro_quiz}
+quiz(
+  question("Which of the following things do we need to include in our script create a reactive figure?",
+    answer("A method to allow users to select data", 
+           correct = TRUE), 
+    answer("A function() statement"),
+    answer("A render function specific for plotting", 
+           correct = TRUE),
+    answer("A `req()` statement if the lack of a selection will break the code"),
+    answer("ggplot code to create the figure", 
+           correct = TRUE),
+    answer("A reference to the input method using the `label` argument"),
+    answer("A reference to the input method using the `inputID` argument", 
+           correct = TRUE),
+    answer("dplyr code to subset the data", 
+           correct = TRUE),
+    allow_retry = TRUE,
+    random_answer_order = TRUE
+)
+)
+```
+
+
+     
+     
+### Let's plot    
+   
+
+To create a reactive plot, we will use `renderPlot({})`. 
+
+```
+# select a method for user input
+checkboxGroupInput(
+  inputId = "speciesSelector", # pick a descriptive name!!!!
+  label = h4("Choose one or more species"),
+  choices = unique(penguins$species), 
+  selected = "Adelie" # optional
+)
+
+# create a reactive object
+penguins_sorted <- reactive({
+   req(input$speciesSelector)
+   
+   filter(penguins, species %in% input$speciesSelector) })
+  
+  
+# use a shiny-specific render function
+# to plot the data
+
+renderPlot({
+
+  penguins_sorted() %>%
+    ggplot(aes(x = species)) +
+    geom_bar()
+})
+```
+
+###   
+
+Important features to notice:    
+
+1. **The reactive data object name must be included inside renderPlot().**    `penguins_sorted()` tells R that the data contained in this variable can change (i.e., it is a reactive data object). 
+
+
+###   
+
+2. **We choose a default value for the checkbox group selector.**    The argument `selected` allows the app author(s) to select one or more options when the app initially starts.
+
+###  
+
+3. **We can automate creating options for the `choices` argument.**    You can choose to hard code (i.e., type out) all option choices or you can use functions like `levels` and `unique` to create a vector of choices.
+
+
+###   
+
+
+
+4. **You only need to code the creation of the input method and reactive data object creation once.** The example above includes the same code to create a checkbox list and select data based on that input. That code only needs to be in a script once. It was included here for completeness so that readers could see the code. You do not need to create multiple reactive data objects. The data object `penguins_sorted()` can be used for both plots and tables (and even multiple plots and tables if you choose).
+
+
+
+
+
+## Check Your Knowledge
+
+
+Consider the following code:
+
+```
+checkboxGroupInput(
+  inputId = "modelSelector", 
+  label = h4("Select"),
+  choices = unique(mpg$model)
+)
+```
+
+```{r exit_quiz}
+quiz(
+  question("What kind of user input object will the code above create?",
+    answer("A free text box"),
+    answer("A list of checkboxes", 
+           correct = TRUE),
+    answer("A list of radio buttons"),
+    answer("Nothing. Input functions must be placed inside conditional panels to function properly."), 
+    message = "Conditional panels are real things in the Shiny world, but you do not have to use them for input functions to be usable. Panels, fluidPage(), column(), tabs--these things and functions give you control over element placement (not functionality).", 
+    random_answer_order = TRUE
+  ),
+  question("How can I control the size of the label? Hint: Do you know what the `h4()` function does?",
+    answer("`label = h3('Select')`", correct = TRUE),
+    answer("`label = h4('Select', size = 18)`"),
+    answer("`label = h4('Select', size = '//large')`"),
+    answer("`label = h4('Select', size = '50%')`"), 
+    random_answer_order = TRUE
+  ),
+  question("How can I change the values in mpg$model so that they look more professional?",
+    answer("`mutate(mpg, model = stringr::str_to_title(model)`", correct = TRUE),
+    answer("`choices = c('A4 = a4', 'Jetta' = 'jetta'` ...) and so on", correct = TRUE),
+    answer("The values cannot be changed."),
+    answer("The values should not be changed.`"), 
+    message = "Manual entry is possible but error prone. If you have a large number of values to recode or revise, consider modifying the variable values to limit the chances of introducing errors like typos or forgetting an option.", 
+    random_answer_order = TRUE, 
+    allow_retry = TRUE, 
+    incorrect = "Are you sure you have selected all possible options? Do not limit yourself to what we have covered here. Think back on what you know about reproducibility, automation, and wrangling data.", 
+    correct = "Great job!"
+  ),
+    question("How can I indicate that I want the app to initialize with 'camry', 'corolla', and 'civic' already selected?",
+    answer("`selected = c('camry', 'corolla', 'civic')`", correct = TRUE),
+    answer("`choices = c(unique(mpg$model), select = c('camry', 'corolla', 'civic'))`"),
+    answer("None of these options are correct.")
+  ),
+  
+  question("I can recode `model` using `mutate()` or `choices =`. Which of the following are true about the impact of that coding choice?",
+    answer("Manually entering the options into `choices` is more likely to introduce errors.", correct = TRUE),
+    answer("Using `choices` means that I have to be careful about using the variable name (not the `choices` label) if I include a `selected` argument.", 
+           correct = TRUE),
+    answer("Using `choices` is the only way to collapse groups into fewer labels."),
+    answer("Using `mutate()` is preferable only for very small datasets."),
+    answer("These options are completely equivalent."),
+    random_answer_order = TRUE, 
+    allow_retry = TRUE
+  )
+)
+```

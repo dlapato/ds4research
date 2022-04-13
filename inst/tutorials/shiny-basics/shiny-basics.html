@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="false" />
+
+<title>R Shiny Basics - Reactivity</title>
+
+<!-- HEAD_CONTENT -->
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/67b7f5fc779e4cfdfd0f021d3d7745b6b6e17149/inst/rmd/h/default.html#L296-L362 -->
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+<!-- end tabsets -->
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-why-reactivity" class="section level2">
+<h2><strong>Why Reactivity?</strong></h2>
+<p>This module will introduce you to key functions for creating interactive features in interactive R products. The concepts and functions detailed in this module can be applied to both flexdashboards with <code>shiny</code> elements and Shiny Apps. Most of the subsections in this module will use language and examples geared towards developing a dashboard, but the concepts and programming skills apply to other projects, too, including articles, books, posters, and even individual figures.</p>
+<div id="section-section" class="section level3">
+<h3></h3>
+</div>
+<div id="section-why-you-have-to-know-it" class="section level3">
+<h3><strong>Why you have to know it</strong></h3>
+<p>This course requires you to learn how to create interactive research products for two reasons. <strong>First is career-related.</strong> Programming skills are in demand, and the ability to create the skillset is beneficial for career advancement regardless of sector (e.g., industry, academia, self-employment). These skills allow one to transform a wall of numbers in a spreadsheet into an interactive experience that empowers readers to explore, expand, and create.</p>
+<p><strong>The second reason centers on reproducibility, transparency, and accessibility.</strong> Interactive research products can give other users the ability to audit your results, even if they do not know how to code. Removing this barrier is critical because most folks do not have programming expertise.</p>
+<p>In short, interactive data products can make your research more engaging.</p>
+<div class="figure">
+<img src="images/DAH_Haadia_Khan_art_museum.jpeg" title="A Pakistani Deaf woman wearing a hijab sits on a bench at an art museum, immersed in a world of florals and soft hues. She places her powered-off hearing aids on top of a sketchbook to her right, closing out the surrounding noise. A tablet and stylus pen have been set down on the left side of the bench." style="width:50.0%" alt="" />
+<p class="caption">Haadia Khan Art for Disabled And Here</p>
+</div>
+</div>
+<div id="section-what-you-have-to-know" class="section level3">
+<h3><strong>What you have to know</strong></h3>
+<p>As part of the course, you must demonstrate an ability to:</p>
+<ol style="list-style-type: decimal">
+<li>Add reactive elements to a flexdashboard<br />
+</li>
+<li>Give interactive elements functional capability<br />
+</li>
+<li>Match appropriate and logical functionality to interactive elements<br />
+</li>
+<li>Understand all necessary code components for creating reactive elements</li>
+</ol>
+</div>
+</div>
+<div id="section-reactive-data-input-functions" class="section level2">
+<h2><strong>Reactive Data Input Functions</strong></h2>
+<p>You can empower users to subset data by categories or variables of interest to them. <strong>First, you must choose an input method.</strong> Your choice should reflect the kinds of options available to your users.</p>
+<div id="section-choosing-the-right-tool" class="section level3">
+<h3>Choosing the right tool</h3>
+<p>Consider five simple ways to solicit user input: a group checkbox (1), radio buttons (2), a slider bar (3), a date range selector (4), and a free text box (5). <strong>Try out each input method.</strong> Don’t worry; you cannot break or hurt anything. These input options will respond if you click on them (e.g., check or uncheck a box), but they are not able to modify any data or disrupt the tutorial environment.</p>
+<div id="quiz1_checkbox" class="form-group shiny-input-checkboxgroup shiny-input-container" role="group" aria-labelledby="quiz1_checkbox-label">
+<label class="control-label" id="quiz1_checkbox-label" for="quiz1_checkbox">
+<h4>1. Checkboxes (group)</h4>
+</label>
+<div class="shiny-options-group">
+<div class="checkbox">
+<label>
+<input type="checkbox" name="quiz1_checkbox" value="6"/>
+<span>6</span>
+</label>
+</div>
+<div class="checkbox">
+<label>
+<input type="checkbox" name="quiz1_checkbox" value="4"/>
+<span>4</span>
+</label>
+</div>
+<div class="checkbox">
+<label>
+<input type="checkbox" name="quiz1_checkbox" value="8"/>
+<span>8</span>
+</label>
+</div>
+</div>
+</div>
+<div id="radio" class="form-group shiny-input-radiogroup shiny-input-container" role="radiogroup" aria-labelledby="radio-label">
+<label class="control-label" id="radio-label" for="radio">
+<h4>2. Radio buttons</h4>
+</label>
+<div class="shiny-options-group">
+<div class="radio">
+<label>
+<input type="radio" name="radio" value="6" checked="checked"/>
+<span>6</span>
+</label>
+</div>
+<div class="radio">
+<label>
+<input type="radio" name="radio" value="4"/>
+<span>4</span>
+</label>
+</div>
+<div class="radio">
+<label>
+<input type="radio" name="radio" value="8"/>
+<span>8</span>
+</label>
+</div>
+</div>
+</div>
+<div class="form-group shiny-input-container" style="width:50%;">
+<label class="control-label" id="quiz1_slider-label" for="quiz1_slider">
+<h4>3. Slider bar</h4>
+</label>
+<input class="js-range-slider" id="quiz1_slider" data-skin="shiny" data-type="double" data-min="0" data-max="1" data-from="0.5" data-to="0.75" data-step="0.05" data-grid="false" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-drag-interval="true" data-data-type="number"/>
+</div>
+<div id="dates" class="shiny-date-range-input form-group shiny-input-container">
+<label class="control-label" id="dates-label" for="dates">
+<h4>4. Date range</h4>
+</label>
+<div class="input-daterange input-group input-group-sm">
+<input class="form-control" type="text" aria-labelledby="dates-label" title="Date format: yyyy-mm-dd" data-date-language="en" data-date-week-start="0" data-date-format="yyyy-mm-dd" data-date-start-view="month" data-date-autoclose="true"/>
+<span class="input-group-addon input-group-prepend input-group-append">
+<span class="input-group-text"> to </span>
+</span>
+<input class="form-control" type="text" aria-labelledby="dates-label" title="Date format: yyyy-mm-dd" data-date-language="en" data-date-week-start="0" data-date-format="yyyy-mm-dd" data-date-start-view="month" data-date-autoclose="true"/>
+</div>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="text-label" for="text">
+<h4>5. Free text box</h4>
+</label>
+<input id="text" type="text" class="form-control" value="Enter text..."/>
+</div>
+</div>
+<div id="section-consider-the-following" class="section level3">
+<h3>Consider the following</h3>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="intro_quiz-1" class="tutorial-question panel-body">
+<div id="intro_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="intro_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="intro_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div class="panel panel-default">
+<div data-label="intro_quiz-2" class="tutorial-question panel-body">
+<div id="intro_quiz-2-answer_container" class="shiny-html-output"></div>
+<div id="intro_quiz-2-message_container" class="shiny-html-output"></div>
+<div id="intro_quiz-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<p>The process of selecting data for data visualizations is the same for tables and plots made with <code>ggplot2</code>. Let’s start with tables.</p>
+</div>
+<div id="section-selecting-and-filtering-data" class="section level3">
+<h3>Selecting and filtering data</h3>
+<p>You can use the <code>dplyr</code> data wrangling functions as part of the reactive data creation process. In the next few chapters, we will discuss how to use operators like <code>%in%</code> and functions like <code>any_of()</code> to create flexible code that will execute no matter how many variables or category options your users select.</p>
+</div>
+</div>
+<div id="section-creating-reactive-tables" class="section level2">
+<h2>Creating Reactive Tables</h2>
+<p>Now, let’s say that you want to allow users to show only a subset of the data in a table. If you use <code>DT::datatable()</code>, your users will be able to search and sort the data, but they cannot truly subset it. They will have whatever dataset you passed to the <code>datatable()</code> function.</p>
+<div id="section-section-1" class="section level3">
+<h3></h3>
+<p>Let’s say that you want to allow your users to select penguins from the <code>penguins</code> dataset from the <code>palmerpenguins</code> package.</p>
+<p>This code is the typical code we might use for <code>flexdashboard</code>.</p>
+<pre><code>DT::datatable(penguins)</code></pre>
+<p>In the above code snippet, the entire <code>penguins</code> dataset is passed to <code>datatable()</code>. If we wanted, we could create a new variable with a subset of the penguins dataset and have that variable read in instead of <code>penguins</code>. However, we the dashboard creators would have to make that variable, which means that that variable would <strong>not</strong> be reactive.</p>
+</div>
+<div id="section-section-2" class="section level3">
+<h3></h3>
+<p>There are many ways to create a reactive table. Here is one way a reactive table could be coded:</p>
+<pre><code># select a method for user input
+checkboxGroupInput(
+  inputId = &quot;speciesSelector&quot;, # pick a descriptive name!!!!
+  label = h4(&quot;Choose one or more species&quot;),
+  choices = unique(penguins$species), 
+  selected = &quot;Adelie&quot; # optional
+)
+
+# create a reactive object
+penguins_sorted &lt;- reactive({
+   req(input$speciesSelector)
+   
+   filter(penguins, species %in% input$speciesSelector) })
+  
+  
+# use a shiny-specific render function
+# note how we write the name of a reactive data object
+DT::renderDataTable(penguins_sorted(), 
+                    options = list(
+  pageLength = 50,   # optional
+  scrollY = &#39;700px&#39;) # optional
+  )   </code></pre>
+</div>
+<div id="section-section-3" class="section level3">
+<h3></h3>
+<p>Important features of reactive code:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Use <code>reactive({ ... })</code> when creating a reactive data object.</strong> Surround the code used to filter and subset the data with this function. You can use all your favorite dplyr functions.</li>
+</ol>
+</div>
+<div id="section-section-4" class="section level3">
+<h3></h3>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Link the input method and the data by using the <code>inputID</code> as if it were a variable.</strong> Instead of <code>filter(penguins, species == "Adelie")</code> or <code>filter(penguins, species %in% c("Adelie", Chinstrap))</code>, we will use <code>filter(penguins, species %in% **input$speciesSelector**)</code>. This syntax shows that we, the app creators, do not know what values will be used to select penguin species, but we will store the users’ choices and use them in creating our table.</li>
+</ol>
+</div>
+<div id="section-section-5" class="section level3">
+<h3></h3>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>We can require users to provide a value with the apply named <code>req()</code> function.</strong> Sometimes we need to require users to provide input if the lack of a value would interfere with our dashboard’s function. For these situations, include a <code>req()</code> statement inside your <code>reactive({})</code> statement. Also consider providing help text and using a default value for selection to cue your users into the correct way to use your dashboard.</li>
+</ol>
+</div>
+<div id="section-section-6" class="section level3">
+<h3></h3>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Reactive data objects always have <code>()</code> at the end of their name when used in coding.</strong> When we refer to reactive data objects, we <em>must</em> remember to include the parentheses (<code>penguins_sorted()</code> not <code>penguins_sorted</code>).</li>
+</ol>
+</div>
+<div id="section-section-7" class="section level3">
+<h3></h3>
+<ol start="5" style="list-style-type: decimal">
+<li><strong>Use the appropriate <code>render*</code> function to ensure best outcomes.</strong> In this case, we use <code>renderDataTable()</code> not <code>datatable()</code>. These functions perform similar tasks, but the first one is specifically for use in Shiny environments, documents, and applications.</li>
+</ol>
+</div>
+<div id="section-pause" class="section level3">
+<h3>Pause</h3>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="render_table_quiz-1" class="tutorial-question panel-body">
+<div id="render_table_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="render_table_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="render_table_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+</div>
+<div id="section-filtering-by-multiple-columns" class="section level2">
+<h2>Filtering by Multiple Columns</h2>
+<p>What if I want my users to be able to filter the data based on values in multiple variables?</p>
+<div id="section-lets-explore" class="section level3">
+<h3>Let’s explore</h3>
+<p>For non-reactive tables, we might do something like this:</p>
+<pre><code>penguins %&gt;% 
+    filter(species %in% c(&quot;Adelie&quot;, &quot;Gentoo&quot;)) %&gt;% 
+    filter(island %in% c(&quot;Dream&quot;)) %&gt;% 
+    filter(between(body_mass_g, 5000, 6000)) %&gt;% 
+    DT::datatable()</code></pre>
+</div>
+<div id="section-section-8" class="section level3">
+<h3></h3>
+<p>The reactive version of the code needs a few modifications. Let’s look at an example where users can subset the data based on penguin species, island residence, and total body mass.</p>
+<pre><code># create an input object for each variable
+checkboxGroupInput(
+  inputId = &quot;speciesSelector&quot;, # pick a descriptive name!!!!
+  label = h4(&quot;Choose one or more species&quot;),
+  choices = unique(penguins$species), 
+  selected = &quot;Adelie&quot; # optional
+)
+
+checkboxGroupInput(
+  inputId = &quot;islandSelector&quot;, # pick a descriptive name!!!!
+  label = h4(&quot;Choose one or more islands&quot;),
+  choices = unique(penguins$species)
+)
+
+sliderInput(
+  inputId = &quot;body_mass_selector&quot;,
+  label   = h4(&quot;Select Penguin Size&quot;),
+  min     = min(penguins$body_mass_g),
+  max     = max(penguins$body_mass_g),
+  value   = c(3000, 5000),
+  step    = 100,
+  ticks   = FALSE, 
+  width = &#39;50%&#39;)
+
+# create a reactive data object
+penguins_multiple_filter &lt;- reactive({ penguins %&gt;% 
+    filter(species %in% input$speciesSelector) %&gt;% 
+    filter(island %in% input$islandSelector) %&gt;% 
+    filter(between(body_mass_g, 
+                   input$body_mass_selector[1],
+                   input$body_mass_selector[2]))
+})
+
+# create a Shiny Data Table object
+DT::renderDataTable(penguins_multiple_filter(), 
+                    options = list(
+                      pageLength = 50, 
+                      scrollY = &#39;600px&#39;,
+                      scrollX = &#39;600px&#39;))</code></pre>
+</div>
+<div id="section-section-9" class="section level3">
+<h3></h3>
+<p>The reactive code looks remarkably similar to the non-reactive code.</p>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="multiple_filter_quiz-1" class="tutorial-question panel-body">
+<div id="multiple_filter_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="multiple_filter_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="multiple_filter_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+</div>
+<div id="section-selecting-columns" class="section level2">
+<h2>Selecting Columns</h2>
+<p>What if I want my users to have the option to expand or shrink the table? How can I code column selection so that 1) no column names are misspelled and 2) users can select one or several column names? How do I account for situations where no columns are selected?</p>
+<div id="section-lets-explore-1" class="section level3">
+<h3>Let’s explore</h3>
+<p>For non-reactive tables, we might do something like this:</p>
+<pre><code>penguins %&gt;% 
+    select(species, island, body_mass_g) %&gt;% 
+    DT::datatable()</code></pre>
+</div>
+<div id="section-section-10" class="section level3">
+<h3></h3>
+<p>The reactive version of the code needs a few modifications. Let’s look at an example where users can choose to display any of the variables in <code>penguins</code>.</p>
+<pre><code># create input object allowing users to choose variables
+checkboxGroupInput(
+  inputId = &quot;variableSelector&quot;,     # pick a descriptive name (!)
+  label = h4(&quot;Choose one or more variables for the table&quot;),
+  choices = names(penguins)
+)
+
+
+# create reactive data object
+penguin_select &lt;- reactive({ penguins %&gt;% 
+    dplyr::select(any_of(input$variableSelector)) # note the use of any_of (!)
+})
+
+
+# create a Shiny Data Table object
+DT::renderDataTable(penguin_select(), 
+                    options = list(
+                      pageLength = 50, 
+                      scrollY = &#39;600px&#39;, # optional choices
+                      scrollX = &#39;600px&#39;))
+</code></pre>
+</div>
+<div id="section-section-11" class="section level3">
+<h3></h3>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="select_table_quiz-1" class="tutorial-question panel-body">
+<div id="select_table_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="select_table_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="select_table_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+<div id="section-lets-refine-the-table-options" class="section level3">
+<h3>Let’s refine the table options</h3>
+<p>Variable names generally do not make good labels. They are typically are not capitalized, which may appear professional. Also, variable names that are not complete words may be unintellible to a general audience.</p>
+<p>Consider the variable names in the <code>mtcars</code> dataset.</p>
+<pre><code>##  [1] &quot;mpg&quot;  &quot;cyl&quot;  &quot;disp&quot; &quot;hp&quot;   &quot;drat&quot; &quot;wt&quot;   &quot;qsec&quot; &quot;vs&quot;   &quot;am&quot;   &quot;gear&quot;
+## [11] &quot;carb&quot;</code></pre>
+<p>How many people would know that <code>drat</code> refers to “rear axle ratio”? Probably not many.</p>
+</div>
+<div id="section-section-12" class="section level3">
+<h3></h3>
+<p>If we want our app users to see labels different from our variable names, we can specify the new labels in the <code>choices</code> argument of the function that creates the input method.</p>
+<pre><code># create input object allowing users to choose variables
+# use the choices argument to create refined labels for users
+checkboxGroupInput(
+  inputId = &quot;variableSelector&quot;,       # pick a descriptive name (!)
+  label = h4(&quot;Choose one or more variables for the table&quot;),
+  choices = c(&quot;Species&quot; = &quot;species&quot;,
+              &quot;Island&quot; = &quot;island&quot;,
+              &quot;Body mass (g)&quot; = &quot;body_mass_g&quot;,
+              &quot;Bill length (mm)&quot; = &quot;bill_length_mm&quot;,
+              &quot;Bill depth (mm)&quot; = &quot;bill_depth_mm&quot;,
+              &quot;Flipper length (mm)&quot; = &quot;flipper_length_mm&quot;,
+              &quot;Sex&quot; = &quot;sex&quot;,
+              &quot;Year&quot; = &quot;year&quot;
+  )
+)
+</code></pre>
+</div>
+</div>
+<div id="section-creating-reactive-plots" class="section level2">
+<h2><strong>Creating Reactive Plots</strong></h2>
+<p>We have made a table with our reactive data object (<code>penguins_sorted()</code>), but what if we want a reactive figure? Based on what you have learned about creating reactive tables, which of the following things do we need to create a reactive figure?</p>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="render_figure_intro_quiz-1" class="tutorial-question panel-body">
+<div id="render_figure_intro_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="render_figure_intro_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="render_figure_intro_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div id="section-lets-plot" class="section level3">
+<h3>Let’s plot</h3>
+<p>To create a reactive plot, we will use <code>renderPlot({})</code>.</p>
+<pre><code># select a method for user input
+checkboxGroupInput(
+  inputId = &quot;speciesSelector&quot;, # pick a descriptive name!!!!
+  label = h4(&quot;Choose one or more species&quot;),
+  choices = unique(penguins$species), 
+  selected = &quot;Adelie&quot; # optional
+)
+
+# create a reactive object
+penguins_sorted &lt;- reactive({
+   req(input$speciesSelector)
+   
+   filter(penguins, species %in% input$speciesSelector) })
+  
+  
+# use a shiny-specific render function
+# to plot the data
+
+renderPlot({
+
+  penguins_sorted() %&gt;%
+    ggplot(aes(x = species)) +
+    geom_bar()
+})</code></pre>
+</div>
+<div id="section-section-13" class="section level3">
+<h3></h3>
+<p>Important features to notice:</p>
+<ol style="list-style-type: decimal">
+<li><strong>The reactive data object name must be included inside renderPlot().</strong> <code>penguins_sorted()</code> tells R that the data contained in this variable can change (i.e., it is a reactive data object).</li>
+</ol>
+</div>
+<div id="section-section-14" class="section level3">
+<h3></h3>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>We choose a default value for the checkbox group selector.</strong> The argument <code>selected</code> allows the app author(s) to select one or more options when the app initially starts.</li>
+</ol>
+</div>
+<div id="section-section-15" class="section level3">
+<h3></h3>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>We can automate creating options for the <code>choices</code> argument.</strong> You can choose to hard code (i.e., type out) all option choices or you can use functions like <code>levels</code> and <code>unique</code> to create a vector of choices.</li>
+</ol>
+</div>
+<div id="section-section-16" class="section level3">
+<h3></h3>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>You only need to code the creation of the input method and reactive data object creation once.</strong> The example above includes the same code to create a checkbox list and select data based on that input. That code only needs to be in a script once. It was included here for completeness so that readers could see the code. You do not need to create multiple reactive data objects. The data object <code>penguins_sorted()</code> can be used for both plots and tables (and even multiple plots and tables if you choose).</li>
+</ol>
+</div>
+</div>
+<div id="section-check-your-knowledge" class="section level2">
+<h2>Check Your Knowledge</h2>
+<div id="section-question-1" class="section level3">
+<h3>Question 1</h3>
+<p>Consider the following code:</p>
+<pre><code>checkboxGroupInput(
+  inputId = &quot;modelSelector&quot;, 
+  label = h4(&quot;Select&quot;),
+  choices = unique(mpg$model)
+)</code></pre>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
+<div class="panel panel-default">
+<div data-label="exit_quiz-1" class="tutorial-question panel-body">
+<div id="exit_quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="exit_quiz-1-message_container" class="shiny-html-output"></div>
+<div id="exit_quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div class="panel panel-default">
+<div data-label="exit_quiz-2" class="tutorial-question panel-body">
+<div id="exit_quiz-2-answer_container" class="shiny-html-output"></div>
+<div id="exit_quiz-2-message_container" class="shiny-html-output"></div>
+<div id="exit_quiz-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div class="panel panel-default">
+<div data-label="exit_quiz-3" class="tutorial-question panel-body">
+<div id="exit_quiz-3-answer_container" class="shiny-html-output"></div>
+<div id="exit_quiz-3-message_container" class="shiny-html-output"></div>
+<div id="exit_quiz-3-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div class="panel panel-default">
+<div data-label="exit_quiz-4" class="tutorial-question panel-body">
+<div id="exit_quiz-4-answer_container" class="shiny-html-output"></div>
+<div id="exit_quiz-4-message_container" class="shiny-html-output"></div>
+<div id="exit_quiz-4-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<div class="panel panel-default">
+<div data-label="exit_quiz-5" class="tutorial-question panel-body">
+<div id="exit_quiz-5-answer_container" class="shiny-html-output"></div>
+<div id="exit_quiz-5-message_container" class="shiny-html-output"></div>
+<div id="exit_quiz-5-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+library(palmerpenguins)
+library(knitr)
+
+#library(here)
+knitr::opts_chunk$set(echo = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::session_stop_event(session)
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "intro_quiz-1",     question = structure("If you saw an option for a group checkbox (first option shown), how many of the answer options would you expect you could select?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_3c3a129",         option = "One and only one", value = "One and only one",         label = structure("One and only one", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f4fad2b",         option = "One or multiple", value = "One or multiple",         label = structure("One or multiple", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "intro_quiz-1-answer", question = "intro_quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nIf you saw an option for a group checkbox (first option shown), how many of the answer options would you expect you could select?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1350292694.87122, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "intro_quiz-2",     question = structure("Which input option would be best for allowing users to select values for a continuous variable?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_5f20d99",         option = "Radio button", value = "Radio button", label = structure("Radio button", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1152af5",         option = "Slider bar", value = "Slider bar", label = structure("Slider bar", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_14d6564",         option = "Checkboxes (group)", value = "Checkboxes (group)",         label = structure("Checkboxes (group)", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_99d9316",         option = "Free text box", value = "Free text box", label = structure("Free text box", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "intro_quiz-2-answer", question = "intro_quiz-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhich input option would be best for allowing users to select values for a continuous variable?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1786667255.66802, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_text", label = "render_table_quiz-1",     question = structure("What do you notice about how reactive data object names look? (Hint: With what other R object could reactive data objects be confused?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_2137cd6",         option = "Reactive data objects look like functions",         value = "Reactive data objects look like functions",         label = structure("Reactive data objects look like functions", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Check your answer against the key", html = TRUE, class = c("html",     "character")), incorrect = structure("Check your answer against the key", html = TRUE, class = c("html",     "character")), message = structure("Reactive data objects look like functions", html = TRUE, class = c("html",     "character")), post_message = NULL), ids = list(answer = "render_table_quiz-1-answer",         question = "render_table_quiz-1"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat do you notice about how reactive data object names look? (Hint: With what other R object could reactive data objects be confused?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 432159763.29876, options = list()), class = c("learnr_text", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_text", label = "multiple_filter_quiz-1",     question = structure("What are some differences in the code that you notice?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_58732a",         option = "Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering.",         value = "Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering.",         label = structure("Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Check your answer against the key", html = TRUE, class = c("html",     "character")), incorrect = structure("Check your answer against the key", html = TRUE, class = c("html",     "character")), message = structure("Possible answers: (1) A unique input option must be created for each variable. (2) input$<inputID> must be used instead of actual values like Biscoe or Chinstrap. (3) For slider bars with multiple selectors, brackets must be included to differentiate the lower and upper values for filtering.", html = TRUE, class = c("html",     "character")), post_message = NULL), ids = list(answer = "multiple_filter_quiz-1-answer",         question = "multiple_filter_quiz-1"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat are some differences in the code that you notice?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1740127715.18969, options = list()), class = c("learnr_text", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "select_table_quiz-1",     question = structure("What do you think of the table we made? Could there be any interpretability issues?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_cb50980",         option = "The table header names are variable names.",         value = "The table header names are variable names.",         label = structure("The table header names are variable names.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_848bf8b",         option = "The variable values are not easily understood.",         value = "The variable values are not easily understood.",         label = structure("The variable values are not easily understood.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9c5f052",         option = "This is a trick question. The table looks fine and would be easily understandable.",         value = "This is a trick question. The table looks fine and would be easily understandable.",         label = structure("This is a trick question. The table looks fine and would be easily understandable.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "select_table_quiz-1-answer", question = "select_table_quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat do you think of the table we made? Could there be any interpretability issues?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 698483485.174743, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "render_figure_intro_quiz-1",     question = structure("Which of the following things do we need to include in our script create a reactive figure?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_60f03de",         option = "A method to allow users to select data", value = "A method to allow users to select data",         label = structure("A method to allow users to select data", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_201ab31",         option = "A function() statement", value = "A function() statement",         label = structure("A function() statement", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_95f5470",         option = "A render function specific for plotting", value = "A render function specific for plotting",         label = structure("A render function specific for plotting", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_25d852c",         option = "A `req()` statement if the lack of a selection will break the code",         value = "A `req()` statement if the lack of a selection will break the code",         label = structure("A <code>req()<\u002fcode> statement if the lack of a selection will break the code", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f60529c",         option = "ggplot code to create the figure", value = "ggplot code to create the figure",         label = structure("ggplot code to create the figure", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d6594ee",         option = "A reference to the input method using the `label` argument",         value = "A reference to the input method using the `label` argument",         label = structure("A reference to the input method using the <code>label<\u002fcode> argument", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_6c07d4d",         option = "A reference to the input method using the `inputID` argument",         value = "A reference to the input method using the `inputID` argument",         label = structure("A reference to the input method using the <code>inputID<\u002fcode> argument", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_49433ec",         option = "dplyr code to subset the data", value = "dplyr code to subset the data",         label = structure("dplyr code to subset the data", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "render_figure_intro_quiz-1-answer", question = "render_figure_intro_quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhich of the following things do we need to include in our script create a reactive figure?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 1423383412.33719, options = list()), class = c("learnr_checkbox", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "exit_quiz-1",     question = structure("What kind of user input object will the code above create?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_d9b36e1",         option = "A free text box", value = "A free text box",         label = structure("A free text box", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_784d0ac",         option = "A list of checkboxes", value = "A list of checkboxes",         label = structure("A list of checkboxes", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_36a96f",         option = "A list of radio buttons", value = "A list of radio buttons",         label = structure("A list of radio buttons", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2b86e21",         option = "Nothing. Input functions must be placed inside conditional panels to function properly.",         value = "Nothing. Input functions must be placed inside conditional panels to function properly.",         label = structure("Nothing. Input functions must be placed inside conditional panels to function properly.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = structure("Conditional panels are real things in the Shiny world, but you do not have to use them for input functions to be usable. Panels, fluidPage(), column(), tabs--these things and functions give you control over element placement (not functionality).", html = TRUE, class = c("html",     "character")), post_message = NULL), ids = list(answer = "exit_quiz-1-answer",         question = "exit_quiz-1"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat kind of user input object will the code above create?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = FALSE,     seed = 37235643.9826608, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "exit_quiz-2",     question = structure("How can I control the size of the label? Hint: Do you know what the <code>h4()<\u002fcode> function does?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_334ec21",         option = "`label = h3('Select')`", value = "`label = h3('Select')`",         label = structure("<code>label = h3(&#39;Select&#39;)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_c437414",         option = "`label = h4('Select', size = 18)`", value = "`label = h4('Select', size = 18)`",         label = structure("<code>label = h4(&#39;Select&#39;, size = 18)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3b88edc",         option = "`label = h4('Select', size = '//large')`",         value = "`label = h4('Select', size = '//large')`", label = structure("<code>label = h4(&#39;Select&#39;, size = &#39;//large&#39;)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9b203a7",         option = "`label = h4('Select', size = '50%')`", value = "`label = h4('Select', size = '50%')`",         label = structure("<code>label = h4(&#39;Select&#39;, size = &#39;50%&#39;)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "exit_quiz-2-answer", question = "exit_quiz-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nHow can I control the size of the label? Hint: Do you know what the <code>h4()<\u002fcode> function does?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = FALSE,     seed = 838373012.609602, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "exit_quiz-3",     question = structure("How can I change the values in mpg$model so that they look more professional?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_946979c",         option = "`mutate(mpg, model = stringr::str_to_title(model)`",         value = "`mutate(mpg, model = stringr::str_to_title(model)`",         label = structure("<code>mutate(mpg, model = stringr::str_to_title(model)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_eea555d",         option = "`choices = c('A4 = a4', 'Jetta' = 'jetta'` ...) and so on",         value = "`choices = c('A4 = a4', 'Jetta' = 'jetta'` ...) and so on",         label = structure("<code>choices = c(&#39;A4 = a4&#39;, &#39;Jetta&#39; = &#39;jetta&#39;<\u002fcode> ...) and so on", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_836c913",         option = "The values cannot be changed.", value = "The values cannot be changed.",         label = structure("The values cannot be changed.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_ec68544",         option = "The values should not be changed.`", value = "The values should not be changed.`",         label = structure("The values should not be changed.`", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Great job!", html = TRUE, class = c("html",     "character")), try_again = structure("Are you sure you have selected all possible options? Do not limit yourself to what we have covered here. Think back on what you know about reproducibility, automation, and wrangling data.", html = TRUE, class = c("html",     "character")), incorrect = structure("Are you sure you have selected all possible options? Do not limit yourself to what we have covered here. Think back on what you know about reproducibility, automation, and wrangling data.", html = TRUE, class = c("html",     "character")), message = structure("Manual entry is possible but error prone. If you have a large number of values to recode or revise, consider modifying the variable values to limit the chances of introducing errors like typos or forgetting an option.", html = TRUE, class = c("html",     "character")), post_message = NULL), ids = list(answer = "exit_quiz-3-answer",         question = "exit_quiz-3"), loading = structure("<strong>Loading:<\u002fstrong> \nHow can I change the values in mpg$model so that they look more professional?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 221086545.397049, options = list()), class = c("learnr_checkbox", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "exit_quiz-4",     question = structure("How can I indicate that I want the app to initialize with &#39;camry&#39;, &#39;corolla&#39;, and &#39;civic&#39; already selected?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_a55d2a4",         option = "`selected = c('camry', 'corolla', 'civic')`",         value = "`selected = c('camry', 'corolla', 'civic')`",         label = structure("<code>selected = c(&#39;camry&#39;, &#39;corolla&#39;, &#39;civic&#39;)<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5a36b31",         option = "`choices = c(unique(mpg$model), select = c('camry', 'corolla', 'civic'))`",         value = "`choices = c(unique(mpg$model), select = c('camry', 'corolla', 'civic'))`",         label = structure("<code>choices = c(unique(mpg$model), select = c(&#39;camry&#39;, &#39;corolla&#39;, &#39;civic&#39;))<\u002fcode>", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1f183b3",         option = "None of these options are correct.", value = "None of these options are correct.",         label = structure("None of these options are correct.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "exit_quiz-4-answer", question = "exit_quiz-4"),     loading = structure("<strong>Loading:<\u002fstrong> \nHow can I indicate that I want the app to initialize with &#39;camry&#39;, &#39;corolla&#39;, and &#39;civic&#39; already selected?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 363613667.330679, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "exit_quiz-5",     question = structure("I can recode <code>model<\u002fcode> using <code>mutate()<\u002fcode> or <code>choices =<\u002fcode>. Which of the following are true about the impact of that coding choice?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_904c944",         option = "Manually entering the options into `choices` is more likely to introduce errors.",         value = "Manually entering the options into `choices` is more likely to introduce errors.",         label = structure("Manually entering the options into <code>choices<\u002fcode> is more likely to introduce errors.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2362e50",         option = "Using `choices` means that I have to be careful about using the variable name (not the `choices` label) if I include a `selected` argument.",         value = "Using `choices` means that I have to be careful about using the variable name (not the `choices` label) if I include a `selected` argument.",         label = structure("Using <code>choices<\u002fcode> means that I have to be careful about using the variable name (not the <code>choices<\u002fcode> label) if I include a <code>selected<\u002fcode> argument.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_adcc9dd",         option = "Using `choices` is the only way to collapse groups into fewer labels.",         value = "Using `choices` is the only way to collapse groups into fewer labels.",         label = structure("Using <code>choices<\u002fcode> is the only way to collapse groups into fewer labels.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_fbea0f",         option = "Using `mutate()` is preferable only for very small datasets.",         value = "Using `mutate()` is preferable only for very small datasets.",         label = structure("Using <code>mutate()<\u002fcode> is preferable only for very small datasets.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e6daf7",         option = "These options are completely equivalent.",         value = "These options are completely equivalent.", label = structure("These options are completely equivalent.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "exit_quiz-5-answer", question = "exit_quiz-5"),     loading = structure("<strong>Loading:<\u002fstrong> \nI can recode <code>model<\u002fcode> using <code>mutate()<\u002fcode> or <code>choices =<\u002fcode>. Which of the following are true about the impact of that coding choice?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 377326849.824293, options = list()), class = c("learnr_checkbox", "tutorial_question")))
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["header-attrs"]},{"type":"character","attributes":{},"value":["2.13"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pandoc"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["header-attrs.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"character","attributes":{},"value":["<style>h1 {font-size: 34px;}\n       h1.title {font-size: 38px;}\n       h2 {font-size: 30px;}\n       h3 {font-size: 24px;}\n       h4 {font-size: 18px;}\n       h5 {font-size: 16px;}\n       h6 {font-size: 12px;}\n       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}\n       pre:not([class]) { background-color: white }<\/style>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.13"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-javascript"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-css"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap-datepicker-js"]},{"type":"character","attributes":{},"value":["1.9.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/datepicker"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/bootstrap-datepicker.min.js"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["<script>(function() {\n        var datepicker = $.fn.datepicker.noConflict();\n        $.fn.bsDatepicker = datepicker;\n      })();\n     <\/script>"]},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap-datepicker-css"]},{"type":"character","attributes":{},"value":["1.9.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["href"]}},"value":[{"type":"character","attributes":{},"value":["shared/datepicker"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/bootstrap-datepicker3.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]}},"value":[{"type":"character","attributes":{},"value":["backports","base","bslib","checkmate","cli","compiler","datasets","digest","ellipsis","evaluate","fastmap","graphics","grDevices","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","later","learnr","lifecycle","magrittr","markdown","methods","mime","palmerpenguins","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.4.1","4.0.3","0.3.1","2.0.0","3.2.0","4.0.3","4.0.3","0.6.29","0.3.2","0.15","1.1.0","4.0.3","4.0.3","0.5.2","1.5.4","1.6.5","0.1.4","1.8.0","1.37","1.3.0","0.10.1","1.0.1","2.0.2","1.1","4.0.3","0.12","0.1.0","1.2.0.1","2.5.1","1.0.8","1.0.2","2.13","2.0.2","0.13","0.4.0","1.7.1","4.0.3","1.7.6","1.4.0","4.0.3","4.0.3","2.5.0","0.30","1.8-4","2.3.5"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">R Shiny Basics - Reactivity</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>
